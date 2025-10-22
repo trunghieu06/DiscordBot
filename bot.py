@@ -20,6 +20,37 @@ async def on_ready():
 async def hello(ctx):
     await ctx.send("Hello! 👋 I’m alive and ready!")
 
+import json
+
+WORDS_FILE = "words.json"
+
+def load_words():
+    if not os.path.exists(WORDS_FILE):
+        return []
+    with open(WORDS_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def save_words(words):
+    with open(WORDS_FILE, "w", encoding="utf-8") as f:
+        json.dump(words, f, indent=4, ensure_ascii=False)
+
+@bot.command()
+async def addword(ctx, word, type, meaning, example=None):
+    words = load_words()
+    for w in words:
+        if w["word"] == word:
+            await ctx.send(f":x: The word {word} already exists.")
+            return
+    new_word = {
+        "word" : word,
+        "type" : type,
+        "meaning" : meaning,
+        "example" : example or ""
+    }
+    words.append(new_word)
+    save_words(words)
+    await ctx.send(f":white_check_mark: Added word: {word} to dictionary.")
+
 # Keep bot alive
 from flask import Flask
 import threading
